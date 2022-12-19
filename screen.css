@@ -1,0 +1,142 @@
+:root {
+  --color-bg: #d5d0cd;
+  --color-fg: #595755;
+  --color-raised-face: #eee9e7;
+  --color-dragged-raised-face: #f6f3f2;
+  --color-danger: #c90202;
+
+  --corner-radius: 0.4em;
+  --highlight-shading: -0.1em -0.1em 0.3em rgba(255, 255, 255, 0.5);
+  --shadow-shading: 0.1em 0.1em 0.3em rgba(0, 0, 0, 0.1);
+  --color-field-shadow: #d7d3cc;
+  --color-field-highlight: #f8f7f5;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: normal;
+  font-size: 100%;
+}
+
+h1 {
+  font-size: clamp(100%, 5vw, 200%);
+  text-align: center;
+  font-weight: bold;
+}
+
+input, select, textarea, button {
+  font: inherit;
+  color: inherit;
+}
+
+label {
+  cursor: pointer;
+}
+
+html {
+  font-family: sans-serif;
+}
+
+body,
+main,
+form,
+fieldset > :first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+body {
+  max-width: 80ch;
+  margin: 0 auto;
+  padding: 1em;
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
+fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2em;
+  align-items: flex-start;
+  padding: 1em;
+}
+
+fieldset > :first-child {
+  flex: 100 0;
+  min-width: 12em;
+}
+
+fieldset > :last-child {
+  flex: 1 1;
+  width: 100%;
+}
+
+button,
+fieldset {
+  box-shadow: var(--highlight-shading), var(--shadow-shading);
+  border-radius: var(--corner-radius);
+  background: var(--color-raised-face);
+  border: 1px solid var(--color-field-shadow);
+  border-top-color: var(--color-field-highlight);
+  border-left-color: var(--color-field-highlight);
+  transition: background-color 0.2s;
+}
+
+fieldset[data-dragging] {
+  background-color: var(--color-dragged-raised-face);
+  z-index: 1;
+}
+
+button {
+  padding: 0.7em 1.2em;
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:active,
+input[type=text] {
+  box-shadow: inset var(--shadow-shading), inset var(--highlight-shading);
+  background: inherit;
+  border: 1px solid var(--color-field-highlight);
+  border-top-color: var(--color-field-shadow);
+  border-left-color: var(--color-field-shadow);
+}
+
+input[name=title] {
+  padding: 0.7em;
+  border-radius: var(--corner-radius);
+  width: 100%;
+}
+
+fieldset label:nth-of-type(1) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+
+fieldset label:nth-of-type(2) {
+  width: max-content;
+}
+
+#controls:not([hidden]) {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+fieldset button[type=button],
+#controls button:last-child {
+  color: var(--color-danger);
+}
+
+fieldset button[type=button] {
+  font-size: 87.5%;
+}
+
