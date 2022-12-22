@@ -155,6 +155,7 @@
       for (let task of data) $tasks.append(createTask(task))
     }
 
+  $tasks.onsubmit = ev => ev.preventDefault()
   $tasks.onclick = ev => {
     let $del = ev.target.closest('button[value=delete]')
     if ($del) deleteTask($del.closest('fieldset'))
