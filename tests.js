@@ -2,13 +2,13 @@
   'use strict'
 
   let
-    { testDocument } = window.VANILLA_TESTER
+    { testDocument } = window.PokeAtUI
 
   testDocument('index.html')
     .useCase('Default UI', (ui, done) => {
       ui.countElementsWithLabel('button', 'Add task', 1)
-      ui.noElementsWithLabel('form field', 'Task')
-      ui.noElementsWithLabel('button', 'Clear completed')
+      ui.noElementsMatch('form field', 'Task')
+      ui.noElementsMatch('button', 'Clear completed')
       done()
     })
     .useCase('Add new task', (ui, done) => {
@@ -72,8 +72,8 @@
       ui.fieldShouldHaveValue('Task', 'My second task')
       // delete last remaining task
       ui.clickElement('button', 'Delete')
-      ui.noElementsWithLabel('Task')
-      ui.noElementsWithLabel('Clear completed')
+      ui.noElementsMatch('Task')
+      ui.noElementsMatch('Clear completed')
       done()
     })
     .useCase('Order tasks by dragging', (ui, done) => {
@@ -89,7 +89,7 @@
       ui.grabElementAtPoint(626, 225)
       ui.dragGrabbedElementBy(12, 173, thenDrop)
       function thenDrop() {
-        ui.dropElement()
+        ui.dropGrabbedElement()
         ui.fieldShouldHaveValue('Task', 'My second task', 1)
         ui.fieldShouldHaveValue('Task', 'My first task', 2)
         done()

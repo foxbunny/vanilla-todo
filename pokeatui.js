@@ -176,6 +176,7 @@
           '>': { key: '>', code: 'Period', which: 62, shiftKey: true },
           '/': { key: '/', code: 'Slash', which: 47, shiftKey: false },
           '?': { key: '?', code: 'Slash', which: 63, shiftKey: true },
+          ' ': { key: ' ', code: 'Space', which: 32, shiftKey: false },
         },
         NON_BUBBLING_EVENTS = ['focus', 'blur', 'load', 'unload', 'scroll'],
         dispatchEvent = ($, type, init = {}) => {
@@ -223,7 +224,7 @@
               break
             case 'form field':
               for (let $ of $frame.contentDocument.querySelectorAll(':is(input,select,textarea):not([hidden])')) {
-                let $label = $.id && $frame.contentDocument.querySelector(`label[for=${$.id}]`) || $.closest('label')
+                let $label = $.id && $frame.contentDocument.querySelector(`label[for=${$.id}]:not([hidden])`) || $.closest('label:not([hidden])')
                 if (!$label) continue
                 if ($label.textContent.includes(label)) yield $
               }
@@ -238,12 +239,12 @@
           if ($$elms.length) return $$elms
           throw Error(`No ${elementType} elements found with label "${label}"`)
         },
-        getElementByLabel = (elementType, label, nth = 1) => {
+        getElementByLabel = (elementType, label, position = 1) => {
           // Get a single element that match the element type and label.
           // Not finding any matches is an automatic failure, so this is also
           // and assertion. The third parameter is the order of the element
           // withing the list of all matches.
-          let i = nth
+          let i = position
           for (let $ of generateElementsByLabel(elementType, label)) if (!--i) return $
           throw Error(`No ${elementType} elements found with label "${label}"`)
         },
@@ -272,13 +273,13 @@
             }
           },
           // Mouse interactions
-          clickElement(elementType, label, nth = 1) {
+          clickElement(elementType, label, position = 1) {
             // Click an element with specified type and label. The third
             // parameter is the order fo the element in the list of all
             // matching element.
             let
               $focusedElement = $frame.contentDocument.activeElement,
-              $ = getElementByLabel(elementType, label, nth)
+              $ = getElementByLabel(elementType, label, position)
 
             if ($focusedElement && $focusedElement !== $) blurElement($focusedElement)
 
@@ -409,7 +410,7 @@
               this.setTimeout(move, 50)
             }())
           },
-          dropElement() {
+          dropGrabbedElement() {
             // This is the release phase in the drag & drop motion.
 
             if (!$frame.contentDocument.__grabbedElement)
@@ -444,6 +445,9 @@
             // Simulate typing into an input. This is an async function as it
             // uses the timer to simulate delays between key presses.
             let $ = $frame.contentDocument.activeElement
+
+            if (!$) throw Error(`No focused element found`)
+
             // Remember the original value before typing in order to simulate
             // the change event on blur.
             $.__originalValue ??= $.value
@@ -466,7 +470,7 @@
             dispatchEvent($, 'input')
           },
           // Assert element count
-          noElementsWithLabel(elementType, label) {
+          noElementsMatch(elementType, label) {
             // Check that there are no elements that match the element type and
             // label.
             for (let $ of generateElementsByLabel(elementType, label))
@@ -479,29 +483,25 @@
             if ($$elms.length !== count) throw Error(`Expected ${count} ${elementType} elements with label "${label}", but found ${$$elms.length}`)
           },
           // Assert element state
-          shouldHaveFocus(elementType, label, nth = 1) {
+          shouldHaveFocus(elementType, label, position = 1) {
             // Check that the element matching the element type and label has
             // focus.
-            let $ = getElementByLabel(elementType, label, nth)
+            let $ = getElementByLabel(elementType, label, position)
             if ($frame.contentDocument.activeElement === $) return
             throw Error(`Expected ${elementType} element with label "${label}" to have focus, but it does not`)
           },
           // Assert element value
-          fieldShouldHaveValue(label, value, nth = 1) {
+          fieldShouldHaveValue(label, value, position = 1) {
             // Check that the a form field element with specified label has
             // the specified value.
-            let $ = getElementByLabel('form field', label, nth)
+            let $ = getElementByLabel('form field', label, position)
             switch ($.type) {
               case 'checkbox':
-                // For checkboxes we use human-readable labels for the state
+              case 'radio':
+                // For checkboxes/radios we use human-readable labels for the state
                 if (value === 'checked' && $.checked) return
                 if (value === 'unchecked' && !$.checked) return
                 if (value === 'indeterminate' && $.indeterminate) return
-                break
-              case 'radio':
-                // For radios we use human-readable labels for the state
-                if (value === 'checked' && $.checked) return
-                if (value === 'unchecked' && !$.checked) return
                 break
               default:
                 // For all other inputs, we are looking for an exact value match
@@ -606,6 +606,6 @@
     module.exports = { testDocument }
   }
   else {
-    window.VANILLA_TESTER = { testDocument }
+    window.PokeAtUI = { testDocument }
   }
 }
