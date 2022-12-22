@@ -207,13 +207,15 @@
   $addTask.onclick = () => {
     let $task = createTask({})
     $tasks.append($task)
-    $task.querySelector('[name=title]').focus()
     storeTasks()
     toggleClearCompleted()
+    $task.querySelector('[name=title]').focus()
   }
   $clearCompleted.onclick = clearCompleted
+  window.onbeforeunload = storeTasks
 
   loadTasks()
+  toggleClearCompleted()
 
   document.querySelector('main').hidden = false
 }

@@ -7,9 +7,17 @@ the DOM.
 
 ## Running the example
 
-The example can be opened in your browser normally without requiring any 
-development server. You can also use the HTML preview feature in your IDE or 
-editor if one is available.
+The example file, `index.html` can be opened in your browser normally without 
+requiring any development server. You can also use the HTML preview feature in 
+your IDE or editor if one is available.
+
+## Running tests
+
+Test are executed in the `test.html` file. This file is opened in the 
+browser the same way you would open the `index.html` file. Tests results are 
+shown in the console. The actual code of the tests is found in the `tests.js` 
+file. The tests are executed with the help of a custom-made test runner 
+found in `vanila-tester.js`.
 
 ## Screenshot
 
