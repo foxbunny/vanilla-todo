@@ -19,6 +19,14 @@ shown in the console. The actual code of the tests is found in the `tests.js`
 file. The tests are executed with the help of a custom-made test runner 
 found in `vanila-tester.js`.
 
+## Live demo
+
+You will find the live demo at 
+[foxbunny.github.io/vanilla-todo](https://foxbunny.github.io/vanilla-todo/). 
+The tests can also be run live by opening 
+[this page](https://foxbunny.github.io/vanilla-todo/tests.html) (results are
+shown in the developer console).
+
 ## Screenshot
 
 ![Screenshot of the vanilla TODO app](./screenshot.png)
