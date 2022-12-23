@@ -24,9 +24,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: clamp(100%, 5vw, 200%);
-  text-align: center;
-  font-weight: bold;
+  text-indent: 100vw;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 20em;
+  width: 100%;
+  aspect-ratio: 200 / 110;
+  background: url('logo.svg') no-repeat;
+  background-size: contain;
+  margin: 1em auto;
 }
 
 input, select, textarea, button {
