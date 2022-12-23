@@ -65,3 +65,14 @@ To render the fieldset contents we use the `innerHTML` property. This is
 widely considered an unsafe practice, but it is actually only unsafe in 
 cases where user input is directly inserted into the markup. We use an 
 `escapeHTML` function to clean the input before inserting into the HTML.
+
+### Touch event fallback
+
+Mobile devices do not support the HTML drag & drop API. We can provide a 
+fallback based on touch gestures without feature detection and similar gimmicks.
+By calling `Event.preventDefault()` in the `touchstart` event listener, we 
+prevent some of the events that are triggered later, including the `dragstart`.
+Therefore we are able to disable the standard drag & drop handling as soon as 
+user starts using touch events for the purpose. As long as both methods provide
+an equivalent (and preferably identical) functionality, the end user is none 
+the wiser.
