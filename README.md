@@ -1,3 +1,5 @@
+![Vanilla TODO logo](logo.svg)
+
 # Yet another TODO app written in plain JavaScript
 
 TODO app is a good basic application that demonstrates a lot of the key 
