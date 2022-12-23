@@ -89,3 +89,8 @@ public interface.
 The automated UI tests use a very high-level description of the test to avoid 
 hard-coding anything related to the application implementation to avoid having 
 to expose anything internal just for the testing purposes.
+
+## License
+
+This code is licensed under the terms of the MIT license. See
+[LICENSE.txt](LICENSE.txt) for the boring legal verbiage.
