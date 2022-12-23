@@ -45,7 +45,7 @@ html {
 body,
 main,
 form,
-fieldset > :first-child {
+.editable-fields {
   display: flex;
   flex-direction: column;
   gap: 1em;
@@ -67,7 +67,7 @@ fieldset {
   padding: 1em;
 }
 
-fieldset > :first-child {
+.editable-fields {
   flex: 100 0;
   min-width: 12em;
 }
@@ -77,15 +77,26 @@ fieldset > :last-child {
   width: 100%;
 }
 
-button,
+#add-task,
+#clear-completed,
+.delete-task,
 fieldset {
   box-shadow: var(--highlight-shading), var(--shadow-shading);
   border-radius: var(--corner-radius);
-  background: var(--color-raised-face);
   border: 1px solid var(--color-field-shadow);
   border-top-color: var(--color-field-highlight);
   border-left-color: var(--color-field-highlight);
   transition: background-color 0.2s;
+}
+
+#add-task,
+#clear-completed,
+fieldset {
+  background: var(--color-raised-face);
+}
+
+.delete-task {
+  background: inherit;
 }
 
 fieldset[data-dragging] {
@@ -93,14 +104,54 @@ fieldset[data-dragging] {
   z-index: 1;
 }
 
-button {
+.drag-handle {
+  width: 2em;
+  height: 2em;
+  overflow: hidden;
+  background: inherit;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.drag-handle span {
+  text-indent: -100vw;
+  white-space: nowrap;
+}
+
+.drag-handle::after,
+.drag-handle::before {
+  content: '';
+}
+
+.drag-handle::after,
+.drag-handle::before,
+.drag-handle > span {
+  display: block;
+  height: 0.5em;
+  border-radius: 0.1em;
+}
+
+#add-task,
+#clear-completed,
+.delete-task {
   padding: 0.7em 1.2em;
   text-transform: uppercase;
   font-weight: bold;
   cursor: pointer;
 }
 
-button:active,
+:is(
+  #add-task,
+  #clear-completed,
+  .delete-task
+):active,
+.drag-handle::after,
+.drag-handle::before,
+.drag-handle > span,
 input[type=text] {
   box-shadow: inset var(--shadow-shading), inset var(--highlight-shading);
   background: inherit;
@@ -131,12 +182,12 @@ fieldset label:nth-of-type(2) {
   gap: 1em;
 }
 
-fieldset button[type=button],
-#controls button:last-child {
+.delete-task,
+#clear-completed {
   color: var(--color-danger);
 }
 
-fieldset button[type=button] {
+.delete-task {
   font-size: 87.5%;
 }
 

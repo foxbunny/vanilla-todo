@@ -72,8 +72,13 @@
         draggable: true,
         tabIndex: 0, // allow keyboard focusing for ordering using keyboard shortcuts
         name: 'task', // this allows us to iterate all fieldsets in the form using HTMLFormElements.elements.task
+        // Drag handle helps users on small screens to grab the correct element for dragging
         innerHTML: `
-          <div>
+          <div class="drag-handle">
+            <span>Drag handle</span>
+          </div>
+          
+          <div class="editable-fields">
             <input name="id" type="hidden" value="${id}">
             
             <label>
@@ -87,7 +92,7 @@
             </label>
           </div>
           
-          <button type="button" value="delete">Delete</button>
+          <button class="delete-task" type="button" value="delete">Delete</button>
         `,
       }),
     clearCompleted = () => {
@@ -99,11 +104,17 @@
         taskFLIP = startFLIP($task),
         targetFLIP = startFLIP($target)
 
+      // Temporarily fix the container's height
+      $tasks.style.height = `${$tasks.offsetHeight}px`
+
       if (taskFLIP.initialY > targetFLIP.initialY) $tasks.insertBefore($task, $target)
       else if ($target.nextElementSibling) $tasks.insertBefore($task, $target.nextElementSibling)
       else $tasks.append($task)
 
-      return Promise.all([taskFLIP.run(), targetFLIP.run()])
+      return Promise.all([taskFLIP.run(), targetFLIP.run()]).then(() => {
+        // Revert height
+        $tasks.style.height = ''
+      })
     },
     markTaskAsDragging = $task => {
       $tasks.$draggedTask = $task
@@ -161,12 +172,13 @@
     if ($del) deleteTask($del.closest('fieldset'))
   }
   $tasks.oninput = $tasks.onchange = debounce(storeTasks, 300)
+
   $tasks.ondragstart = ev => {
     markTaskAsDragging(ev.target)
     markFormAsDragging()
     ev.dataTransfer.setDragImage($dragGhost, 0, 0)
   }
-  $tasks.ondragover = ev => {
+  $tasks.ondragenter = ev => {
     if (!ev.target.matches('fieldset')) return
 
     let
@@ -177,11 +189,43 @@
     if ($task === $target) return
     swapElements($task, $target)
   }
-  $tasks.ondragend = ev => {
+  $tasks.ondragend = () => {
     unmarkDraggedTaskAsDragging()
     unmarkFormAsDragging()
     storeTasks()
   }
+  $tasks.ontouchstart = ev => {
+    let $target = ev.touches[0].target
+    if (!$target.draggable) return
+    ev.preventDefault()
+    $tasks.dragStartTimeout = setTimeout(() => {
+      markTaskAsDragging($target)
+      markFormAsDragging()
+    }, 1000)
+  }
+  $tasks.ontouchmove = ev => {
+    if (!$tasks.$draggedTask) return
+
+    let
+      { screenX, screenY } = ev.touches[0],
+      $target = document.elementFromPoint(screenX, screenY)?.closest('[draggable]'),
+      $task = $tasks.$draggedTask
+
+    if (screenY < 200) window.scrollBy({ top: -200, behavior: 'smooth' })
+    if (screenY > window.innerHeight - 60) window.scrollBy({ top: 60, behavior: 'smooth' })
+
+    if ($task.isAnimating) return
+    if ($task === $target) return
+    swapElements($task, $target)
+  }
+  $tasks.ontouchend = () => {
+    if (!$tasks.$draggedTask) return
+    clearTimeout($tasks.dragStartTimeout)
+    unmarkDraggedTaskAsDragging()
+    unmarkFormAsDragging()
+    storeTasks()
+  }
+
   $tasks.onkeydown = ev => {
     if (!ev.target.matches('fieldset')) return
 
