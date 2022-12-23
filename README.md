@@ -76,3 +76,13 @@ Therefore we are able to disable the standard drag & drop handling as soon as
 user starts using touch events for the purpose. As long as both methods provide
 an equivalent (and preferably identical) functionality, the end user is none 
 the wiser.
+
+### Non-intrusive testing
+
+This application uses automated UI testing (end-to-end testing) only. It 
+does not use unit tests at all. This is because instrumenting the 
+*application code* to be testable (i.e. writing it in a way that tests can 
+access the code) is relatively expensive. The automated UI tests use a very 
+high-level description of the test to avoid hard-coding anything related to 
+the application implementation to avoid having to expose anything internal 
+just for the testing purposes.
