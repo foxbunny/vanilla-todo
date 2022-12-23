@@ -90,7 +90,7 @@
       ui.clickElement('form field', 'Task', 4)
       ui.pasteIntoFocusedField('My last task')
       ui.scrollToTop()
-      ui.grabElementAtPoint(617, 166)
+      ui.grabElementAtPoint(66, 336)
       ui.dragGrabbedElementBy(3, 580, thenDrop)
       function thenDrop() {
         ui.dropGrabbedElement()
