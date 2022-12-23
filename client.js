@@ -189,6 +189,10 @@
     if ($task === $target) return
     swapElements($task, $target)
   }
+  $tasks.ondragover = ev => {
+    // Present as drop zone
+    if (ev.target.matches('fieldset')) ev.preventDefault()
+  }
   $tasks.ondragend = () => {
     unmarkDraggedTaskAsDragging()
     unmarkFormAsDragging()
