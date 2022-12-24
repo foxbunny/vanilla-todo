@@ -72,27 +72,37 @@
         draggable: true,
         tabIndex: 0, // allow keyboard focusing for ordering using keyboard shortcuts
         name: 'task', // this allows us to iterate all fieldsets in the form using HTMLFormElements.elements.task
-        // Drag handle helps users on small screens to grab the correct element for dragging
+
+        // The single div that wraps the entire content of the fieldset is a
+        // hack because Firefox does not recognize fieldsets as draggable
+        // elements. See the following bug for more information:
+        //
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1237971
+        //
+        // Drag handle helps users on small screens to grab the correct element
+        // for dragging.
         innerHTML: `
-          <div class="drag-handle">
-            <span>Drag handle</span>
-          </div>
-          
-          <div class="editable-fields">
-            <input name="id" type="hidden" value="${id}">
+          <div>
+            <div class="drag-handle">
+              <span>Drag handle</span>
+            </div>
             
-            <label>
-              <span>Task:</span>
-              <input name="title" type="text" required value="${escapeHTML(title)}">
-            </label>
+            <div class="editable-fields">
+              <input name="id" type="hidden" value="${id}">
+              
+              <label>
+                <span>Task:</span>
+                <input name="title" type="text" required value="${escapeHTML(title)}">
+              </label>
+              
+              <label>
+                <input name="completed" type="checkbox" ${isCompleted ? 'checked' : ''}>
+                <span>Completed</span>
+              </label>
+            </div>
             
-            <label>
-              <input name="completed" type="checkbox" ${isCompleted ? 'checked' : ''}>
-              <span>Completed</span>
-            </label>
+            <button class="delete-task" type="button" value="delete">Delete</button>
           </div>
-          
-          <button class="delete-task" type="button" value="delete">Delete</button>
         `,
       }),
     clearCompleted = () => {
@@ -180,11 +190,11 @@
     ev.dataTransfer.setDragImage($dragGhost, 0, 0)
   }
   $tasks.ondragenter = ev => {
-    if (!ev.target.matches('fieldset')) return
+    if (!ev.target.closest('fieldset')) return
 
     let
       $task = $tasks.$draggedTask,
-      $target = ev.target
+      $target = ev.target.closest('fieldset')
 
     if ($task.isAnimating) return
     if ($task === $target) return

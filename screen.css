@@ -66,6 +66,10 @@ body {
 }
 
 fieldset {
+  border: 0;
+}
+
+fieldset > div {
   display: flex;
   flex-wrap: wrap;
   gap: 1em;
@@ -78,7 +82,7 @@ fieldset {
   min-width: 12em;
 }
 
-fieldset > :last-child {
+fieldset > div > :last-child {
   flex: 1 1;
   width: 100%;
 }
@@ -86,7 +90,7 @@ fieldset > :last-child {
 #add-task,
 #clear-completed,
 .delete-task,
-fieldset {
+fieldset > div {
   box-shadow: var(--highlight-shading), var(--shadow-shading);
   border-radius: var(--corner-radius);
   border: 1px solid var(--color-field-shadow);
@@ -105,7 +109,7 @@ fieldset {
   background: inherit;
 }
 
-fieldset[data-dragging] {
+fieldset[data-dragging] > div {
   background-color: var(--color-dragged-raised-face);
   z-index: 1;
 }
