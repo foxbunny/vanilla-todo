@@ -90,8 +90,8 @@
       ui.clickElement('form field', 'Task', 4)
       ui.pasteIntoFocusedField('My last task')
       ui.scrollToTop()
-      ui.grabElementAtPoint(66, 336)
-      ui.dragGrabbedElementBy(3, 580, thenDrop)
+      ui.grabElementAtPoint(87, 217)
+      ui.dragGrabbedElementBy(3, 480, thenDrop)
       function thenDrop() {
         ui.dropGrabbedElement()
         ui.fieldShouldHaveValue('Task', 'My second task', 1)
