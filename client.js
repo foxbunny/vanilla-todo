@@ -104,7 +104,8 @@
         taskFLIP = startFLIP($task),
         targetFLIP = startFLIP($target)
 
-      // Temporarily fix the container's height
+      // Temporarily fix the container's height to prevent layout jitter while
+      // we swap elements
       $tasks.style.height = `${$tasks.offsetHeight}px`
 
       if (taskFLIP.initialY > targetFLIP.initialY) $tasks.insertBefore($task, $target)
@@ -229,7 +230,6 @@
     unmarkFormAsDragging()
     storeTasks()
   }
-
   $tasks.onkeydown = ev => {
     if (!ev.target.matches('fieldset')) return
 
@@ -252,7 +252,6 @@
         break
     }
   }
-
   $addTask.onclick = () => {
     let $task = createTask({})
     $tasks.append($task)
