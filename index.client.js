@@ -2,12 +2,13 @@
   'use strict'
 
   let
-    $tasks = document.getElementById('tasks'),
-    $addTask = document.getElementById('add-task'),
-    $clearCompleted = document.getElementById('clear-completed'),
-    $dragGhost = Object.assign(document.createElement('div'), { hidden: true })
+    AUTO_SAVE_DELAY = 300,
+    SORT_ANIMATION_DURATION = 200,
+    DRAG_SCROLL_TOP_MARGIN = 200,
+    DRAG_SCROLL_BOTTOM_MARGIN = 60,
+    DRAG_START_DELAY = 1000
 
-  let
+  let // Utils
     toIterable = $nodeOrCollection => {
       if (!$nodeOrCollection) return []
       if ('length' in $nodeOrCollection) return $nodeOrCollection
@@ -37,7 +38,7 @@
             animation = $.animate([
               { transform: `translateY(${initialY - finalY}px` },
               { transform: 'none' },
-            ], { duration: 200 })
+            ], { duration: SORT_ANIMATION_DURATION })
           // Mark the element as animating so that we can prevent multiple
           // animation for the same element from starting in parallel
           $.isAnimating = true
@@ -54,8 +55,20 @@
       }
     }
 
-  let
-    getNextId = () => {
+  let // Data
+    dataStoreTasks = data => {
+      localStorage.tasks = JSON.stringify(data)
+    },
+    dataGetTasks = () => {
+      return JSON.parse(localStorage.tasks ?? '[]')
+    }
+
+  let // View
+    $tasks = document.getElementById('tasks'),
+    $addTask = document.getElementById('add-task'),
+    $clearCompleted = document.getElementById('clear-completed'),
+    $dragGhost = Object.assign(document.createElement('div'), { hidden: true }),
+    viewGetNextId = () => {
       let lastId = 0
       // More about the 'elements' property:
       // https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormControlsCollection
@@ -63,9 +76,9 @@
         lastId = Math.max(lastId, $.value) // NB: Math.max() coerces strings into numbers
       return lastId + 1
     },
-    createTask = ({
+    viewCreateTask = ({
       title = '',
-      id = getNextId(),
+      id = viewGetNextId(),
       isCompleted = false,
     }) =>
       Object.assign(document.createElement('fieldset'), {
@@ -105,11 +118,18 @@
           </div>
         `,
       }),
-    clearCompleted = () => {
+    viewAppendTask = ($task, $parent = $tasks) => {
+      $parent.append($task)
+      $task.querySelector('[name=title]').focus()
+    },
+    viewClearCompleted = () => {
       for (let $ of $tasks.querySelectorAll('input[name=completed]:checked'))
         $.closest('fieldset').remove()
     },
-    swapElements = ($task, $target) => {
+    viewSwapElements = ($task, $target) => {
+      if ($task.isAnimating) return
+      if ($task === $target) return
+
       let
         taskFLIP = startFLIP($task),
         targetFLIP = startFLIP($target)
@@ -127,40 +147,37 @@
         $tasks.style.height = ''
       })
     },
-    markTaskAsDragging = $task => {
+    viewMarkTaskAsDragging = $task => {
       $tasks.$draggedTask = $task
       $task.dataset.dragging = true
     },
-    markFormAsDragging = () => {
+    viewMarkFormAsDragging = () => {
       $tasks.dataset.dragging = true
     },
-    unmarkDraggedTaskAsDragging = () => {
+    viewUnmarkDraggedTaskAsDragging = () => {
       if ($tasks.$draggedTask) {
         delete $tasks.$draggedTask.dataset.dragging
         delete $tasks.$draggedTask
       }
     },
-    unmarkFormAsDragging = () => {
+    viewUnmarkFormAsDragging = () => {
       delete $tasks.dataset.dragging
     },
-    quickSwapTasks = ($task, $target) => {
-      markTaskAsDragging($task)
-      swapElements($task, $target)
-        .then(unmarkDraggedTaskAsDragging)
+    viewQuickSwapTasks = ($task, $target) => {
+      viewMarkTaskAsDragging($task)
+      viewSwapElements($task, $target)
+        .then(viewUnmarkDraggedTaskAsDragging)
       $task.focus()
     },
-    toggleClearCompleted = () => {
+    viewToggleClearCompleted = () => {
       $clearCompleted.hidden = !$tasks.children.length
     },
-    deleteTask = $task => {
+    viewDeleteTask = $task => {
       $task.nextElementSibling?.focus()
       $task.remove()
-      storeTasks()
-      toggleClearCompleted()
-    }
-
-  let
-    storeTasks = () => {
+      viewToggleClearCompleted()
+    },
+    viewGetTaskData = () => {
       let data = []
       // More about the 'elements' property:
       // https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormControlsCollection
@@ -170,53 +187,85 @@
           title: $fieldset.elements.title.value,
           isCompleted: $fieldset.elements.completed.checked, // for checkboxes we use .checked rather than .value
         })
-      localStorage.tasks = JSON.stringify(data)
+      return data
     },
-    loadTasks = () => {
-      let data = JSON.parse(localStorage.tasks ?? '[]')
-      for (let task of data) $tasks.append(createTask(task))
+    viewRevealMain = () => {
+      document.querySelector('main').hidden = false
+    }
+
+  let // Presenters
+    presentStoreTask = () => {
+      dataStoreTasks(viewGetTaskData())
+    },
+    presentLoadTask = () => {
+      for (let task of dataGetTasks()) viewAppendTask(viewCreateTask(task))
+    },
+    presentDeleteTask = $task => {
+      viewDeleteTask($task)
+      presentStoreTask()
+    },
+    presentStartDrag = $task => {
+      viewMarkTaskAsDragging($task)
+      viewMarkFormAsDragging()
+    },
+    presentDragOver = viewSwapElements,
+    presentDrop = () => {
+      viewUnmarkDraggedTaskAsDragging()
+      viewUnmarkFormAsDragging()
+      presentStoreTask()
+    },
+    presentMoveTaskUp = $task => {
+      if (!$task.previousElementSibling) return
+      viewQuickSwapTasks($task, $task.previousElementSibling)
+    },
+    presentMoveTaskDown = $task => {
+      if (!$task.nextElementSibling) return
+      viewQuickSwapTasks($task, $task.nextElementSibling)
+    },
+    presentAppendNewTask = () => {
+      let $task = viewCreateTask({})
+      viewAppendTask($task)
+      viewToggleClearCompleted()
+      presentStoreTask()
+    },
+    presentClearCompleted = viewClearCompleted,
+    presentInitialize = () => {
+      presentLoadTask()
+      viewToggleClearCompleted()
+      viewRevealMain()
     }
 
   $tasks.onsubmit = ev => ev.preventDefault()
   $tasks.onclick = ev => {
     let $del = ev.target.closest('button[value=delete]')
-    if ($del) deleteTask($del.closest('fieldset'))
+    if ($del) presentDeleteTask($del.closest('fieldset'))
   }
-  $tasks.oninput = $tasks.onchange = debounce(storeTasks, 300)
+  $tasks.oninput = $tasks.onchange = debounce(presentStoreTask, AUTO_SAVE_DELAY)
 
   $tasks.ondragstart = ev => {
-    markTaskAsDragging(ev.target)
-    markFormAsDragging()
+    presentStartDrag(ev.target)
     ev.dataTransfer.setDragImage($dragGhost, 0, 0)
   }
   $tasks.ondragenter = ev => {
-    if (!ev.target.closest('fieldset')) return
-
-    let
-      $task = $tasks.$draggedTask,
-      $target = ev.target.closest('fieldset')
-
-    if ($task.isAnimating) return
-    if ($task === $target) return
-    swapElements($task, $target)
+    let $target = ev.target.closest('fieldset')
+    if (!$target) return
+    presentDragOver($tasks.$draggedTask, $target)
   }
   $tasks.ondragover = ev => {
     // Present as drop zone
     if (ev.target.matches('fieldset')) ev.preventDefault()
   }
   $tasks.ondragend = () => {
-    unmarkDraggedTaskAsDragging()
-    unmarkFormAsDragging()
-    storeTasks()
+    presentDrop()
+    presentStoreTask()
   }
   $tasks.ontouchstart = ev => {
-    let $target = ev.touches[0].target
-    if (!$target.draggable) return
+    let $task = ev.touches[0].target
+    if (!$task.draggable) return
     ev.preventDefault()
     $tasks.dragStartTimeout = setTimeout(() => {
-      markTaskAsDragging($target)
-      markFormAsDragging()
-    }, 1000)
+      presentStartDrag($task)
+    }, DRAG_START_DELAY)
   }
   $tasks.ontouchmove = ev => {
     if (!$tasks.$draggedTask) return
@@ -226,19 +275,15 @@
       $target = document.elementFromPoint(screenX, screenY)?.closest('[draggable]'),
       $task = $tasks.$draggedTask
 
-    if (screenY < 200) window.scrollBy({ top: -200, behavior: 'smooth' })
-    if (screenY > window.innerHeight - 60) window.scrollBy({ top: 60, behavior: 'smooth' })
+    if (screenY < DRAG_SCROLL_TOP_MARGIN) window.scrollBy({ top: -DRAG_SCROLL_TOP_MARGIN, behavior: 'smooth' })
+    if (screenY > window.innerHeight - DRAG_SCROLL_BOTTOM_MARGIN) window.scrollBy({ top: DRAG_SCROLL_BOTTOM_MARGIN, behavior: 'smooth' })
 
-    if ($task.isAnimating) return
-    if ($task === $target) return
-    swapElements($task, $target)
+    presentDragOver($task, $target)
   }
   $tasks.ontouchend = () => {
     if (!$tasks.$draggedTask) return
     clearTimeout($tasks.dragStartTimeout)
-    unmarkDraggedTaskAsDragging()
-    unmarkFormAsDragging()
-    storeTasks()
+    presentDrop()
   }
   $tasks.onkeydown = ev => {
     if (!ev.target.matches('fieldset')) return
@@ -247,33 +292,21 @@
 
     switch (ev.code) {
       case 'ArrowUp':
-        if (!$task.previousElementSibling) return
-        quickSwapTasks($task, $task.previousElementSibling)
+        presentMoveTaskUp($task)
         break
       case 'ArrowDown':
-        if (!$task.nextElementSibling) return
-        quickSwapTasks($task, $task.nextElementSibling)
+        presentMoveTaskDown($task)
         break
       case 'Delete':
-        $task.nextElementSibling?.focus()
-        $task.remove()
-        storeTasks()
-        toggleClearCompleted()
+        presentDeleteTask($task)
         break
     }
   }
   $addTask.onclick = () => {
-    let $task = createTask({})
-    $tasks.append($task)
-    storeTasks()
-    toggleClearCompleted()
-    $task.querySelector('[name=title]').focus()
+    presentAppendNewTask()
   }
-  $clearCompleted.onclick = clearCompleted
-  window.onbeforeunload = storeTasks
+  $clearCompleted.onclick = presentClearCompleted
+  window.onbeforeunload = presentStoreTask
 
-  loadTasks()
-  toggleClearCompleted()
-
-  document.querySelector('main').hidden = false
+  presentInitialize()
 }
