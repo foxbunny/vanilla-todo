@@ -1,0 +1,17 @@
+{
+  "name": "vanilla-todo",
+  "version": "1.0.0",
+  "description": "Vanilla TODO using DOM-infused state",
+  "main": "index.client.js",
+  "scripts": {
+    "test": "playwright test",
+    "start": "http-server --port 3000 ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.32.1",
+    "http-server": "^14.1.1"
+  }
+}
