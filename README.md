@@ -7,6 +7,10 @@ concepts in web application development. This particular example focuses on
 the use of forms APIs to represent the entire application sate entirely in 
 the DOM.
 
+## NOTICE
+
+No frameworks were invented in the making of this app.
+
 ## Running the example
 
 The example file, `index.html` can be opened in your browser normally without 
