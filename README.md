@@ -98,15 +98,8 @@ The CSS code associated with the page is named by suffixing
 CSS for `index.html` is named `index.screen.css` suffix, while print CSS would
 be named `index.print.css`.
 
-The categories are ordered inside-out (from the core concepts of the UI 
-logic towards the higher-level application-level logic). The outer layers 
-are built using the inner layers.
-
-This application uses an VP architecture (it's basically an MVP without the 
-M). Therefore, it does not have a "Model" category.
-
-The simple rule is that the code from the inner layers cannot use the 
-methods from the outer layers.
+The naming of the objects within JavaScript code helps identify the layer to 
+which the object belongs.
 
 Global constants are named using all-upper-case snake-case names. For instance,
 `AUTO_SAVE_DELAY`. Global constants are used to label magic values (values 
