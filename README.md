@@ -72,6 +72,8 @@ event-driven. The event listener code performs some basic transformations
 and filtering over the events before invoking the presenters. They are not 
 allowed to access the lower layers.
 
+![Architecture diagram](./arch.jpg)
+
 ### DOM-infused state
 
 State is stored in and represented by the DOM state. We do not store state any
